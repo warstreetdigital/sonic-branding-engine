@@ -1,0 +1,3242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sonic Branding Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Inter, sans-serif;
+    background: radial-gradient(circle at 50% 0%, #151515 0%, #080808 100%);
+    color:#EEE;
+    min-height:100vh;
+    user-select:none;
+    overflow-x:hidden;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+/* Dynamic Styles */
+:root {
+    --brand-primary: #1D6247;
+    --brand-accent: #1EBB72;
+    --brand-primary-rgb: 29, 98, 71;
+    --system-surface: #0C0C0C;
+    --system-card: #141414;
+}
+.overlay-lock{
+    position:fixed; inset:0; pointer-events:none;
+    background:radial-gradient(circle at 50% 100%, rgba(var(--brand-primary-rgb), 0.05), transparent 70%);
+    z-index:2;
+}
+.header{
+    padding:12px 20px;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    background:var(--system-surface);
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--brand-primary), transparent);
+    background-size: 200% 100%;
+    animation: energy-flow 4s linear infinite;
+    box-shadow: 0 0 10px var(--brand-primary);
+}
+@keyframes energy-flow {
+    0% { background-position: 100% 0%; }
+    100% { background-position: -100% 0%; }
+}
+.header-inner{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+.header-titles {
+    min-width: 0;
+    flex: 1;
+}
+.header h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:18px;
+    margin:0;
+    letter-spacing:1px;
+    color:#FFF;
+    text-transform: uppercase;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.header p{
+    margin:0;
+    color:#666;
+    font-size:10px;
+    font-weight:700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.container{
+    padding:30px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(400px,1fr));
+    gap:25px;
+    position: relative;
+    z-index: 5;
+}
+.card-wrap {
+    position: relative;
+    padding: 1px;
+}
+.backlight {
+    position: absolute;
+    inset: -40px;
+    background: radial-gradient(circle at center, rgba(var(--card-glow-rgb, var(--brand-primary-rgb)), 0.1), transparent 60%);
+    opacity: 0.5;
+    z-index: 0;
+    animation: glow-pulse 6s ease-in-out infinite;
+    pointer-events: none;
+    transition: opacity 0.6s, transform 0.6s cubic-bezier(0.2, 0, 0, 1);
+    filter: blur(40px);
+}
+@keyframes glow-pulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.9); }
+    50% { opacity: 0.6; transform: scale(1.1); }
+}
+.card-wrap:hover .backlight {
+    opacity: 0.9;
+    transform: scale(1.15);
+}
+.card{
+    background:var(--system-card);
+    border-radius:2px;
+    padding:0;
+    border:1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+    position:relative;
+    overflow:hidden;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s;
+    display:flex;
+    flex-direction:column;
+    z-index: 1;
+}
+.card:hover{
+    transform: translateY(-8px);
+    border-color: rgba(var(--card-glow-rgb, var(--brand-primary-rgb)), 0.3);
+}
+.card-section{
+    padding:18px 22px;
+    border-bottom:1px solid rgba(255,255,255,0.02);
+    position: relative;
+    z-index: 10;
+}
+.card-section:last-child{border-bottom:none;}
+.mode{
+    font-size:9px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#555;
+    font-weight:800;
+    margin-bottom:2px;
+}
+.title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:16px;
+    margin:0;
+    font-weight: 800;
+    color:#FFF;
+    letter-spacing: -0.2px;
+}
+.desc{
+    font-size:11px;
+    color:#888;
+    line-height:1.4;
+    margin-top:6px;
+}
+.controls{
+    margin-top:10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.play{
+    width:40px;height:40px;border-radius:4px;
+    border:1px solid #333;
+    background:var(--system-surface);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:14px;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-weight:900;
+    color: #FFF;
+}
+.play:hover{background:#222; border-color: var(--brand-primary); box-shadow: 0 0 15px rgba(var(--brand-primary-rgb), 0.3);}
+.play:active{transform:scale(0.96);}
+.progress-wrap{
+    flex:1;height:2px;background:#222;overflow:hidden;
+}
+.progress{
+    height:100%;width:0%;background:var(--brand-primary);
+    box-shadow: 0 0 5px var(--brand-primary);
+    transition: width 0.2s linear;
+}
+/* Spotify-Style UI Overhaul (v4.0) */
+.mini-player-wrap {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: rgba(15,15,15,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 12px 20px;
+    display: none; /* Hidden by default */
+    transform: translateY(100%);
+    transition: transform 0.5s cubic-bezier(0.2, 0, 0, 1);
+}
+.mini-player-wrap.active {
+    display: block;
+    transform: translateY(0);
+}
+.player-inner {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.player-info { flex: 1; min-width: 0; }
+.player-title { font-size: 13px; font-weight: 700; color: #FFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-subtitle { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.player-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--brand-primary);
+    display: flex; align-items: center; justify-content: center;
+    color: #FFF;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(var(--brand-primary-rgb), 0.3);
+}
+.player-progress-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: rgba(255,255,255,0.05);
+}
+.player-progress-bar {
+    height: 100%;
+    background: var(--brand-primary);
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+body.light-mode .mini-player-wrap {
+    background: rgba(255,255,255,0.95);
+    border-top-color: rgba(0,0,0,0.05);
+}
+body.light-mode .player-title { color: #111; }
+body.light-mode .player-subtitle { color: #888; }
+body.light-mode .player-progress-container { background: rgba(0,0,0,0.05); }
+
+/* Branded Hero Player v4.8 */
+.hero-player {
+    max-width: 600px;
+    margin: 20px auto;
+    background: rgba(25, 25, 25, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 25px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 40px rgba(var(--brand-primary-rgb), 0.1);
+    z-index: 10;
+}
+.hero-player::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at top right, rgba(var(--brand-primary-rgb), 0.1), transparent 70%);
+    pointer-events: none;
+}
+.hero-player-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    z-index: 2;
+}
+.hero-info { flex: 1; }
+.hero-track-name { font-size: 18px; font-weight: 800; color: #FFF; margin-bottom: 4px; letter-spacing: -0.5px; }
+.hero-track-artist { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
+.hero-btn {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: var(--brand-primary);
+    color: #FFF;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    box-shadow: 0 10px 25px rgba(var(--brand-primary-rgb), 0.4);
+}
+.hero-btn:hover { transform: scale(1.05); box-shadow: 0 15px 30px rgba(var(--brand-primary-rgb), 0.5); }
+.hero-btn:active { transform: scale(0.95); }
+.hero-btn.loading, .track-play-btn.loading {
+    animation: loading-pulse 1s ease-in-out infinite;
+    opacity: 0.6;
+    pointer-events: none;
+}
+@keyframes loading-pulse {
+    0%, 100% { opacity: 0.4; transform: scale(0.98); }
+    50% { opacity: 0.8; transform: scale(1); }
+}
+
+.hero-progress-area { margin-top: 25px; }
+.hero-time-row { display: flex; justify-content: space-between; font-size: 9px; color: #555; font-family: monospace; margin-top: 8px; font-weight: 700; }
+.hero-progress-bg { height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; position: relative; cursor: pointer; }
+.hero-progress-bg:hover { height: 6px; margin-top: -1px; background: rgba(255,255,255,0.1); }
+.hero-progress-fill { height: 100%; background: var(--brand-primary); width: 0%; box-shadow: 0 0 15px var(--brand-primary); transition: width 0.1s linear; pointer-events: none; }
+
+/* Enhanced Track Highlights */
+.track-item.playing {
+    background: rgba(var(--brand-primary-rgb), 0.2) !important;
+    border-left: 4px solid var(--brand-primary) !important;
+    transform: scale(1.01) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important;
+    opacity: 1 !important;
+}
+.track-item.playing .track-name { color: #FFF; text-shadow: 0 0 15px rgba(var(--brand-primary-rgb), 0.4); }
+.track-item.playing .track-play-btn { background: var(--brand-primary); border-color: var(--brand-primary); }
+
+body.light-mode .hero-player { background: #FFF; border-color: #EEE; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+body.light-mode .hero-track-name { color: #111; }
+body.light-mode .hero-track-artist { color: #888; }
+.hero-player.playing {
+    border-color: rgba(var(--brand-primary-rgb), 0.3);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 50px rgba(var(--brand-primary-rgb), 0.2);
+}
+.hero-player.playing .hero-btn {
+    animation: hero-pulse 2s infinite;
+}
+@keyframes hero-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--brand-primary-rgb), 0.5); transform: scale(1); }
+    50% { box-shadow: 0 0 20px 8px rgba(var(--brand-primary-rgb), 0.3); transform: scale(1.02); }
+}
+
+/* Playlist Experience: Single View v4.6 */
+.playlist-node-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0 10px;
+    padding: 10px;
+}
+.playlist-node {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+}
+.playlist-node.active {
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: #FFF;
+    box-shadow: 0 0 15px rgba(var(--brand-primary-rgb), 0.3);
+    transform: scale(1.1);
+}
+.playlist-node:hover:not(.active) {
+    background: rgba(255,255,255,0.1);
+    color: #FFF;
+}
+
+.playlist-view-container {
+    max-width: 600px;
+    margin: 0 auto 100px; /* Space for sticky nav */
+    position: relative;
+    overflow: hidden;
+    min-height: 500px;
+    z-index: 5;
+}
+.playlist-slider {
+    display: flex;
+    transition: transform 0.3s ease-out;
+}
+.playlist-slide {
+    flex: 0 0 100%;
+    width: 100%;
+}
+.playlist-slide .playlist-card {
+    opacity: 0.4;
+    transform: scale(0.98);
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+.playlist-slide.active .playlist-card {
+    opacity: 1;
+    transform: scale(1);
+}
+.playlist-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    z-index: 1000;
+    background: rgba(13,13,13,0.8);
+    backdrop-filter: blur(20px);
+    padding: 12px 24px;
+    border-radius: 40px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    width: fit-content;
+}
+.nav-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #FFF;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    text-transform: uppercase;
+}
+.nav-btn:active:not(:disabled) {
+    transform: scale(0.96);
+}
+.nav-btn:hover:not(:disabled) {
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 20px rgba(var(--brand-primary-rgb), 0.3);
+}
+.nav-btn:disabled {
+    opacity: 0.1;
+    cursor: not-allowed;
+}
+
+/* Redefining Playlist Card for Single View */
+.playlist-card {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 30px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    opacity: 1 !important;
+    transform: scale(1) !important;
+    margin: 0 10px;
+}
+.playlist-card .track-list {
+    max-height: 1000px;
+    opacity: 1;
+    margin-top: 25px;
+}
+
+body.light-mode .playlist-card { background: #FFF; border-color: #EEE; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+body.light-mode .nav-btn { background: #F0F0F0; color: #333; border-color: #DDD; }
+body.light-mode .nav-btn:hover:not(:disabled) { background: var(--brand-primary); color: #FFF; }
+body.light-mode .playlist-nav { background: rgba(255,255,255,0.8); border-color: #EEE; }
+body.light-mode .playlist-node { background: #F5F5F5; border-color: #EEE; color: #999; }
+body.light-mode .playlist-node.active { background: var(--brand-primary); color: #FFF; }
+.footer {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    width: 100%;
+}
+.playlist-card.active .playlist-name {
+    font-size: 24px;
+    color: #FFF;
+    text-shadow: 0 0 10px rgba(var(--brand-primary-rgb), 0.5);
+}
+.playlist-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.playlist-meta {
+    flex: 1;
+}
+.playlist-idx {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--brand-primary);
+    letter-spacing: 2px;
+    margin-bottom: 2px;
+}
+.playlist-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #FFF;
+    text-transform: capitalize;
+}
+.playlist-count {
+    font-size: 9px;
+    color: #555;
+    font-weight: 700;
+}
+.playlist-card.active .playlist-count { color: var(--brand-accent); }
+
+.placeholder-msg {
+    padding: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: #444;
+    font-style: italic;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    margin-top: 15px;
+}
+.track-list {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.8s cubic-bezier(0.2, 0, 0, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.track-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+.track-item:hover {
+    background: rgba(255,255,255,0.05);
+}
+.track-item.playing {
+    background: rgba(var(--brand-primary-rgb), 0.15);
+    border-left: 4px solid var(--brand-primary);
+    transform: scale(1.01);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    opacity: 1;
+}
+.track-item:not(.playing) { opacity: 0.8; }
+.track-item.playing .track-name { 
+    color: #FFF; 
+    text-shadow: 0 0 10px rgba(var(--brand-primary-rgb), 0.4);
+}
+.track-info {
+    flex: 1;
+}
+.track-name { font-size: 13px; font-weight: 700; color: #EEE; }
+.track-meta { font-size: 9px; color: #666; text-transform: uppercase; margin-top: 2px; }
+.track-duration { font-size: 10px; color: #444; font-family: monospace; }
+
+.track-play-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.track-play-btn:hover {
+    background: var(--brand-primary);
+    color: #FFF;
+}
+.track-item.playing .track-play-btn {
+    background: var(--brand-primary);
+    animation: track-pulse 2s infinite;
+}
+@keyframes track-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--brand-primary-rgb), 0.3); }
+    50% { box-shadow: 0 0 15px 2px rgba(var(--brand-primary-rgb), 0.2); }
+}
+
+body.light-mode .playlist-card {
+    background: rgba(255,255,255,0.8);
+    border-color: rgba(0,0,0,0.05);
+}
+body.light-mode .playlist-card.active {
+    background: #FFF;
+    border-color: var(--brand-primary);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.1), 0 0 20px rgba(var(--brand-primary-rgb), 0.1);
+}
+body.light-mode .playlist-name { color: #111; }
+body.light-mode .playlist-card.active .playlist-name { color: #000; text-shadow: none; }
+body.light-mode .track-item { background: #F9F9F9; }
+body.light-mode .track-item:hover { background: #F0F0F0; }
+body.light-mode .track-name { color: #222; }
+body.light-mode .track-item.playing { background: rgba(var(--brand-primary-rgb), 0.05); }
+.whatsapp-btn, .action-btn{
+    display:inline-block;
+    padding:10px 14px;
+    border-radius:4px;
+    background:#EEE;
+    color:#000;
+    font-weight:800;
+    text-decoration:none;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border:none;
+    cursor:pointer;
+    text-align:center;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.whatsapp-btn:hover, .action-btn:hover{
+    background:#FFF; 
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+.whatsapp-btn:active, .action-btn:active{transform:scale(0.96);}
+.action-btn.secondary{
+    background:rgba(255,255,255,0.03);
+    color:#999;
+    border:1px solid rgba(255,255,255,0.1);
+}
+.action-btn.secondary:hover{border-color:rgba(255,255,255,0.3); color:#FFF; background: rgba(255,255,255,0.05);}
+.action-btn.primary-command{
+    background: var(--brand-primary);
+    color: #FFF;
+    flex: 1.2;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 15px rgba(var(--brand-primary-rgb), 0.3);
+    animation: ignite-breathe 4s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+}
+@keyframes ignite-breathe {
+    0%, 100% { filter: brightness(1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 0 20px rgba(var(--brand-primary-rgb), 0.1); }
+    50% { filter: brightness(1.15); box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 0 40px rgba(var(--brand-primary-rgb), 0.4); }
+}
+.action-btn.primary-command:hover {
+    filter: brightness(1.2);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 0 30px rgba(var(--brand-primary-rgb), 0.7);
+    animation: none;
+    transform: translateY(-2px);
+}
+.action-btn.primary-command:active {
+    filter: brightness(2);
+    transform: scale(0.97);
+    box-shadow: inset 0 10px 20px rgba(0,0,0,0.4);
+    transition: 0.1s;
+}
+
+/* Analytics Grid */
+.stat-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+}
+.stat-item{
+    text-align:left;
+    padding:5px 0;
+}
+.stat-label{
+    font-size:8px;
+    text-transform:uppercase;
+    font-weight:900;
+    color:#444;
+    letter-spacing:1px;
+    margin-bottom: 0px;
+}
+.stat-value{
+    font-size:24px;
+    font-weight:900;
+    color:#FFF;
+    line-height: 1;
+    letter-spacing: -0.5px;
+    transition: color 0.3s;
+}
+.pulse-value {
+    animation: stat-pulse 0.5s ease-out;
+}
+@keyframes stat-pulse {
+    0% { color: var(--brand-accent); text-shadow: 0 0 10px var(--brand-accent); transform: scale(1.05); }
+    100% { color: #FFF; text-shadow: none; transform: scale(1); }
+}
+
+/* Modal System */
+.modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.85);
+    z-index:1000; display:none; align-items:center; justify-content:center;
+    padding:20px;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease-out;
+}
+.modal-content{
+    background:var(--system-surface); width:100%; max-width:550px;
+    max-height:85vh; border-radius:4px;
+    display:flex; flex-direction:column;
+    box-shadow:0 0 50px rgba(0,0,0,1);
+    border: 1px solid #333;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.modal-overlay.show{
+    display: flex;
+}
+.modal-overlay.show .modal-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+.modal-header{
+    padding:15px 20px; border-bottom:1px solid #222;
+    display:flex; justify-content:space-between; align-items:center;
+    background: #0D0D0D;
+}
+.modal-title{
+    font-family:'Space Grotesk', sans-serif; font-size:14px; font-weight:800;
+    text-transform:uppercase; letter-spacing:1px; color:#FFF;
+}
+.modal-body{
+    padding:20px; overflow-y:auto; flex:1;
+}
+.modal-close{
+    cursor:pointer; font-size:24px; color:#444; transform:rotate(45deg); line-height:1; font-weight: 300; transition: color 0.2s;
+}
+.modal-close:hover { color: #FFF; }
+
+/* Cinematic Insight Bar */
+.insight-bar{
+    background: rgba(0,0,0,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    padding: 8px 20px;
+    font-size: 9px;
+    font-family: monospace;
+    color: #888;
+    display: flex;
+    gap: 25px;
+    overflow-x: auto;
+    white-space: nowrap;
+    position: relative;
+    z-index: 9;
+}
+.insight-item{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.insight-label{
+    color: var(--brand-accent);
+    font-weight: 900;
+}
+.leading-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--brand-primary);
+    color: #FFF;
+    font-size: 8px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(var(--brand-primary-rgb), 0.5);
+    z-index: 15;
+    animation: badge-pulse 2s infinite;
+}
+@keyframes badge-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(0.95); }
+}
+.card-wrap.spike .backlight {
+    animation: spike-pulse 1s ease-in-out infinite;
+}
+@keyframes spike-pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.15); filter: brightness(1.5); }
+}
+.card-wrap.dead .backlight, .card-wrap.low .backlight {
+    opacity: 0.1;
+    filter: grayscale(1) blur(80px);
+    animation: none;
+}
+.card-wrap.strong .backlight {
+    opacity: 0.85;
+    background: radial-gradient(circle at center, rgba(var(--card-glow-rgb, var(--brand-primary-rgb)), 0.3), transparent 70%);
+}
+.card-wrap.leading .backlight {
+    opacity: 0.8;
+    background: radial-gradient(circle at center, rgba(var(--card-glow-rgb, var(--brand-primary-rgb)), 0.25), transparent 70%);
+}
+.card-wrap.leading .card {
+    border-color: rgba(var(--card-glow-rgb, var(--brand-primary-rgb)), 0.6);
+}
+.rank-shift {
+    animation: rank-pulse 0.8s cubic-bezier(0.2, 0, 0, 1);
+}
+@keyframes rank-pulse {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.03); filter: brightness(1.5); box-shadow: 0 0 50px rgba(var(--brand-primary-rgb), 0.5); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+/* GATEWAY MODULE (NEW LAYER) */
+.gateway-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: #080808;
+    position: relative;
+    overflow: hidden;
+    animation: gateway-enter 0.8s cubic-bezier(0.2, 0, 0, 1) forwards;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* Environment Layer: Drifting Haze */
+.gateway-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: radial-gradient(circle at 30% 30%, rgba(var(--brand-primary-rgb), 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(var(--brand-accent-rgb), 0.03) 0%, transparent 40%);
+    animation: haze-drift 15s linear infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+@keyframes haze-drift {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(5%, 5%) rotate(5deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* Street Light concept: Overhead beams */
+.street-light-beam {
+    position: absolute;
+    top: 0;
+    width: 200px;
+    height: 80vh;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.03), transparent);
+    filter: blur(40px);
+    z-index: 1;
+    pointer-events: none;
+    transform-origin: top;
+}
+.street-light-beam:nth-child(1) { left: 15%; transform: rotate(-5deg); }
+.street-light-beam:nth-child(2) { right: 15%; transform: rotate(5deg); }
+
+.gateway-wrap::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, rgba(var(--brand-primary-rgb), 0.08) 0%, transparent 70%);
+    animation: glow-breathe 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+    transition: background 0.3s ease;
+}
+@keyframes gateway-enter {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes glow-breathe {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+@keyframes intro-enter {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.gateway-identity {
+    text-align: center;
+    margin-bottom: 60px;
+    z-index: 10;
+}
+.gateway-identity h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 48px;
+    letter-spacing: 6px;
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: #FFFFFF;
+    text-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    line-height: 1.1;
+}
+.gateway-identity p {
+    font-size: 12px;
+    letter-spacing: 4px;
+    color: var(--brand-accent);
+    text-transform: uppercase;
+    margin-top: 15px;
+    font-weight: 800;
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(var(--brand-primary-rgb), 0.3);
+}
+.gateway-intro {
+    max-width: 550px;
+    text-align: center;
+    margin-bottom: 60px;
+    font-size: 14px;
+    color: #AAA;
+    line-height: 1.8;
+    font-style: italic;
+    z-index: 10;
+    opacity: 0;
+    animation: intro-enter 1.2s cubic-bezier(0.2, 0, 0, 1) forwards;
+    animation-delay: 0.7s;
+}
+.gate-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    width: 100%;
+    max-width: 900px;
+    z-index: 10;
+}
+.gate-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(15px);
+    padding: 60px 30px;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+    overflow: visible; /* Show halos */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    opacity: 0;
+    animation: gate-stagger 0.6s cubic-bezier(0.2, 0, 0, 1) forwards;
+    z-index: 10;
+}
+
+/* Striplight System */
+.striplight-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--brand-primary), transparent);
+    background-size: 200% 100%;
+    animation: striplight-flow 3s linear infinite;
+    z-index: 5;
+    opacity: 0.6;
+}
+@keyframes striplight-flow {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Card Halo backlight */
+.gate-halo {
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(circle at center, rgba(var(--brand-primary-rgb), 0.15) 0%, transparent 75%);
+    z-index: -1;
+    border-radius: 50%;
+    animation: halo-breathe 4s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0.8;
+}
+@keyframes halo-breathe {
+    0%, 100% { opacity: 0.4; transform: scale(0.9); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* Portal Differentiation */
+.gate-card.control .striplight-top {
+    height: 2px;
+    filter: brightness(1.5);
+    animation-duration: 2s;
+}
+.gate-card.control .gate-halo {
+    background: radial-gradient(circle at center, rgba(var(--brand-primary-rgb), 0.25) 0%, transparent 75%);
+    animation-duration: 3s;
+}
+
+.gate-card:nth-child(1) { animation-delay: 0.3s; }
+.gate-card:nth-child(2) { animation-delay: 0.5s; }
+
+@keyframes gate-stagger {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.gate-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(var(--brand-primary-rgb), 0.3), transparent 75%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    z-index: 0;
+}
+.gate-card:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(var(--brand-primary-rgb), 0.5);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+}
+.gate-card:active {
+    transform: scale(0.97);
+    transition: 0.1s;
+}
+.gate-card:hover::before {
+    opacity: 1;
+}
+.gate-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+.gate-desc {
+    font-size: 11px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    position: relative;
+    z-index: 2;
+}
+.gate-card:hover .gate-desc {
+    color: #CCC;
+}
+@media (max-width: 768px) {
+    .gate-grid { grid-template-columns: 1fr; gap: 20px; }
+    .gateway-identity h1 { font-size: 32px; }
+    .gate-card { padding: 40px 20px; }
+}
+
+/* Gateway Theme Switcher */
+.theme-switcher {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 1000;
+}
+.theme-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #FFF;
+    padding: 10px 18px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    backdrop-filter: blur(20px);
+    transition: all 0.4s cubic-bezier(0.2, 0, 0, 1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+@media (max-width: 768px) {
+    .theme-switcher {
+        top: 16px;
+        right: 16px;
+    }
+    .theme-btn {
+        padding: 8px 14px;
+        font-size: 8px;
+    }
+    .gateway-identity {
+        padding-top: 40px; /* Collision buffer for switcher */
+    }
+}
+.theme-btn:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+.theme-btn:active { transform: scale(0.95); }
+
+/* Gateway Light Mode Overrides */
+body.light-mode {
+    background: #F5F5F2;
+    background: radial-gradient(circle at 50% 0%, #FFFFFF 0%, #E8E8E4 100%);
+    color: #111;
+}
+body.light-mode .overlay-lock {
+    background: radial-gradient(circle at 50% 100%, rgba(var(--brand-primary-rgb), 0.05), transparent 70%);
+    opacity: 0.5;
+}
+body.light-mode .header {
+    background: #FFFFFF;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+body.light-mode .header h1 { color: #111; }
+body.light-mode .header p { color: #666; }
+
+body.light-mode .card {
+    background: #FFFFFF;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F9F9F9 100%);
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.03);
+}
+body.light-mode .card .title { color: #111; }
+body.light-mode .card .desc { color: #666; }
+body.light-mode .stat-value { color: #111; }
+body.light-mode .stat-label { color: #999; }
+body.light-mode .action-btn.secondary { background: #F0F0F0; border-color: #DDD; color: #444; }
+body.light-mode .insight-bar { background: rgba(0,0,0,0.03); border-bottom-color: rgba(0,0,0,0.05); color: #666; }
+
+body.light-mode .gateway-wrap {
+    background: #F5F5F2;
+    background: radial-gradient(circle at 50% 50%, #FFFFFF 0%, #E8E8E4 100%);
+}
+body.light-mode .gateway-wrap::before {
+    background: radial-gradient(circle at 50% 50%, rgba(var(--brand-primary-rgb), 0.06) 0%, transparent 70%);
+    opacity: 0.8;
+}
+body.light-mode .gateway-identity h1 {
+    color: #111111;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+body.light-mode .gateway-identity p {
+    opacity: 1;
+    color: var(--brand-primary);
+}
+body.light-mode .gateway-intro {
+    color: #444444;
+    text-shadow: none;
+    font-weight: 500;
+}
+body.light-mode .gate-card {
+    background: #FFFFFF;
+    background: linear-gradient(135deg, #FFFFFF 0%, #FAFAFA 100%);
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
+}
+body.light-mode .gate-card:hover {
+    background: #FFFFFF;
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.08), 0 0 40px rgba(var(--brand-primary-rgb), 0.1);
+    border-color: rgba(var(--brand-primary-rgb), 0.2);
+}
+body.light-mode .striplight-top {
+    opacity: 0.3;
+}
+body.light-mode .gate-halo {
+    opacity: 0.3;
+}
+body.light-mode .gate-title {
+    color: #111111;
+    text-shadow: none;
+}
+body.light-mode .gate-desc {
+    color: #666666;
+}
+body.light-mode .theme-btn {
+    background: rgba(0,0,0,0.04);
+    border-color: rgba(0,0,0,0.1);
+    color: #000;
+}
+body.light-mode .gate-share-btn {
+    border-color: rgba(0,0,0,0.1);
+    color: #444;
+}
+body.light-mode .gate-powered {
+    color: #888;
+}
+
+/* Gateway Conversion & Share Layer */
+.gate-conversion-layer {
+    margin-top: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    z-index: 10;
+    width: 100%;
+}
+.gate-cta-btn {
+    background: var(--brand-primary);
+    color: #FFF;
+    padding: 16px 32px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.2, 0, 0, 1);
+    box-shadow: 0 10px 30px rgba(var(--brand-primary-rgb), 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.gate-cta-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(var(--brand-primary-rgb), 0.5);
+    filter: brightness(1.1);
+}
+.gate-cta-btn:active { transform: scale(0.97); }
+
+.gate-share-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.gate-share-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #888;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.gate-share-btn:hover {
+    border-color: rgba(255,255,255,0.3);
+    color: #FFF;
+}
+.gateway-wrap.light-mode .gate-share-btn {
+    border-color: rgba(0,0,0,0.1);
+    color: #666;
+}
+.gateway-wrap.light-mode .gate-share-btn:hover {
+    border-color: rgba(0,0,0,0.3);
+    color: #000;
+}
+
+.gate-share-panel {
+    position: absolute;
+    bottom: calc(100% + 15px);
+    background: rgba(20,20,20,0.95);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(15px);
+    padding: 15px;
+    border-radius: 6px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 180px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    z-index: 100;
+    animation: panel-up 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+@keyframes panel-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.gate-share-panel.active { display: flex; }
+
+.share-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 4px;
+    color: #AAA;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.share-option:hover {
+    background: rgba(255,255,255,0.05);
+    color: #FFF;
+}
+.gateway-wrap.light-mode .gate-share-panel {
+    background: rgba(255,255,255,0.95);
+    border-color: rgba(0,0,0,0.1);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+}
+.gateway-wrap.light-mode .share-option {
+    color: #666;
+}
+.gateway-wrap.light-mode .share-option:hover {
+    background: rgba(0,0,0,0.05);
+    color: #000;
+}
+
+.gate-powered {
+    margin-top: 60px;
+    font-size: 9px;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 800;
+    opacity: 0.6;
+}
+
+/* PHASE GATE: CONTROL ROOM (v5.4) */
+.system-gate-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #000;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    animation: gate-fade-in 0.6s cubic-bezier(0.2, 0, 0, 1);
+    color: #FFF;
+}
+@keyframes gate-fade-in {
+    from { opacity: 0; backdrop-filter: blur(0px); }
+    to { opacity: 1; backdrop-filter: blur(40px); }
+}
+.gate-content-box {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+}
+.gate-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(29, 98, 71, 0.2), transparent 70%);
+    transform: translate(-50%, -50%);
+    filter: blur(40px);
+    z-index: -1;
+    animation: glow-pulse 4s infinite ease-in-out;
+}
+@keyframes glow-pulse {
+    0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
+}
+.gate-badge {
+    display: inline-block;
+    padding: 6px 15px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 25px;
+}
+.gate-title-main {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+}
+.gate-subtext {
+    font-size: 13px;
+    color: var(--brand-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 30px;
+}
+.gate-desc-text {
+    font-size: 14px;
+    color: #AAA;
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+.gate-footer-brand {
+    margin-top: 50px;
+    font-size: 9px;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-weight: 700;
+}
+.gate-main-btn {
+    background: #FFF;
+    color: #000;
+    border: none;
+    padding: 18px 35px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+.gate-main-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 20px 40px rgba(255,255,255,0.1);
+}
+.gate-phase-label {
+    font-size: 8px;
+    color: #666;
+    background: rgba(255,255,255,0.03);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    font-weight: 800;
+    vertical-align: middle;
+}
+.notification-wrap {
+    position: relative;
+    display: inline-block;
+}
+.icon-btn {
+    width: 40px;
+    padding: 0 !important;
+    font-size: 16px;
+    position: relative;
+}
+.icon-btn.has-new .icon {
+    animation: bell-swing 2s ease-in-out infinite;
+    display: block;
+}
+@keyframes bell-swing {
+    0%, 100% { transform: rotate(0); }
+    10%, 30% { transform: rotate(15deg); }
+    20%, 40% { transform: rotate(-15deg); }
+    50% { transform: rotate(0); }
+}
+.noti-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #FF3B3B;
+    color: white;
+    font-size: 9px;
+    font-weight: 900;
+    min-width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(255, 59, 59, 0.4);
+}
+.noti-panel {
+    position: absolute;
+    top: calc(100% + 15px);
+    right: 0;
+    width: 320px;
+    max-width: 85vw;
+    max-height: 70vh;
+    background: #151515;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    border-radius: 6px;
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+}
+.noti-panel.active {
+    display: flex;
+}
+@media (max-width: 768px) {
+    .noti-panel {
+        position: fixed;
+        top: 60px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        max-width: none;
+    }
+}
+.noti-header {
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 10px;
+    font-weight: 800;
+    color: #666;
+    letter-spacing: 1px;
+}
+.noti-list {
+    flex: 1;
+    overflow-y: auto;
+}
+.noti-item {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: background 0.3s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.noti-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+.noti-item.unread {
+    border-left: 3px solid var(--brand-primary);
+}
+.noti-item .brand {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--brand-primary);
+    text-transform: uppercase;
+}
+.noti-item .msg {
+    font-size: 12px;
+    color: #AAA;
+    line-height: 1.4;
+}
+.noti-item .time {
+    font-size: 9px;
+    color: #444;
+}
+.noti-item.unread .msg {
+    color: #EEE;
+}
+.noti-item.read {
+    opacity: 0.6;
+}
+
+/* Mobile Grid Overrides */
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 10px;
+        gap: 10px;
+    }
+    .header-inner {
+        flex-direction: row;
+        align-items: center;
+    }
+    .btn-group {
+        display: flex;
+        gap: 6px;
+    }
+    .action-btn {
+        padding: 0 10px;
+        font-size: 9px;
+        height: 32px;
+    }
+}
+@media (max-width: 480px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+<div class="overlay-lock"></div>
+
+<div class="header">
+    <div class="header-inner">
+        <div class="header-titles">
+            <h1 id="brand-name">LOADING...</h1>
+            <p id="brand-tagline">Initializing System...</p>
+        </div>
+        <div id="header-controls" class="btn-group">
+            <!-- Dynamic Hub controls will be injected here -->
+        </div>
+    </div>
+</div>
+
+<div id="insight-bar" class="insight-bar"></div>
+
+<div class="container" id="playlist-container">
+    <!-- Tracks or Brand cards injected dynamically -->
+</div>
+
+<!-- WhatsApp CTA -->
+<div style="text-align:center; padding: 20px 0;" id="whatsapp-container"></div>
+
+<!-- Brand Info Sections -->
+<div class="container" style="grid-template-columns:1fr; padding-top:0;" id="info-container">
+    <!-- Info sections injected dynamically -->
+</div>
+
+<!-- Mini Player (Spotify Style) -->
+<div id="mini-player" class="mini-player-wrap">
+    <!-- Mini Player injected dynamically -->
+</div>
+
+<div class="footer" id="footer-text"></div>
+
+<!-- History Modal -->
+<div id="historyModal" class="modal-overlay" onclick="if(event.target==this) toggleHistory()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title" id="historyModalTitle">Session History</div>
+            <div class="modal-close" onclick="toggleHistory()">+</div>
+        </div>
+        <div class="modal-body" id="historyModalBody">
+            <!-- History sessions injected dynamically -->
+        </div>
+    </div>
+</div>
+
+<script>
+// ==============================
+// SECTION: CONFIG / CONSTANTS
+// ==============================
+
+const BRANDS = {
+  "holiday-inn": {
+    slug: "holiday-inn",
+    name: "HOLIDAY INN HARARE",
+    tagline: "Branded Audio Identity Demo · Curated Playlist Experience",
+    whatsapp: "263779388560?text=Hello%20WarStreet%20Studios,%20I%20am%20interested%20in%20the%20Holiday%20Inn%20Harare%20branded%20audio%20system.",
+    theme: {
+      primary: "#1D6247",
+      accent: "#1EBB72"
+    },
+    playlists: [
+      {
+        id: "demo",
+        label: "Demo Experience",
+        type: "intro",
+        tracks: [
+          { "id": "green-arrival", "title": "Green Arrival", "artist": "WARSTREET BAND", "duration": "3:45", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/01-green-arrival.mp3" },
+          { "id": "lobby-flow", "title": "Lobby Flow", "artist": "WARSTREET BAND", "duration": "4:12", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/02-lobby-flow.mp3" },
+          { "id": "breakfast-harmony", "title": "Breakfast Harmony", "artist": "WARSTREET BAND", "duration": "4:00", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/03-breakfast-harmony.mp3" },
+          { "id": "poolside-breeze", "title": "Poolside Breeze", "artist": "WARSTREET BAND", "duration": "4:30", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/04-poolside-breeze.mp3" },
+          { "id": "business-lounge", "title": "Business Lounge", "artist": "WARSTREET BAND", "duration": "3:15", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/05-business-lounge.mp3" },
+          { "id": "evening-cocktails", "title": "Evening Cocktails", "artist": "WARSTREET BAND", "duration": "5:00", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/06-evening-cocktails.mp3" },
+          { "id": "dining-elegance", "title": "Dining Elegance", "artist": "WARSTREET BAND", "duration": "4:10", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/07-dining-elegance.mp3" },
+          { "id": "terrace-glow", "title": "Terrace Glow", "artist": "WARSTREET BAND", "duration": "4:20", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/08-terrace-glow.mp3" },
+          { "id": "night-lounge", "title": "Night Lounge", "artist": "WARSTREET BAND", "duration": "4:35", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/09-night-lounge.mp3" },
+          { "id": "signature-events", "title": "Signature Events", "artist": "WARSTREET BAND", "duration": "4:25", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/10-signature-events.mp3" },
+          { "id": "late-night-pulse", "title": "Late Night Pulse", "artist": "WARSTREET BAND", "duration": "4:40", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/11-late-night-pulse.mp3" },
+          { "id": "twilight-closure", "title": "Twilight Closure", "artist": "WARSTREET BAND", "duration": "4:50", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/demo/12-twilight-closure.mp3" }
+        ]
+      },
+      { 
+        id: "experience", label: "Core Experience", type: "core", 
+        tracks: [
+          { id: "exp-01", title: "01 Brand Welcome", artist: "WARSTREET BAND", duration: "4:05", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/experience/01-brand-welcome.mp3", locked: false },
+          { id: "exp-02", title: "02 Signature Identity", artist: "WARSTREET BAND", duration: "3:50", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/experience/02-signature-identity.mp3", locked: false },
+          { id: "exp-03", title: "03 Core Sonic Theme", artist: "WARSTREET BAND", duration: "4:20", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/experience/03-core-sonic-theme.mp3", locked: false },
+          { id: "exp-04", title: "04 Immersive Flow", artist: "WARSTREET BAND", duration: "3:40", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/experience/04-immersive-flow.mp3", locked: false },
+          { id: "exp-05", title: "05 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "exp-06", title: "06 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "exp-07", title: "07 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "exp-08", title: "08 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "exp-09", title: "09 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "exp-10", title: "10 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "exp-11", title: "11 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "exp-12", title: "12 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true }
+        ]
+      },
+      { 
+        id: "morning", label: "Morning Playlist", type: "time", 
+        tracks: [
+          { id: "mor-01", title: "01 Morning Soft Arrival", artist: "WARSTREET BAND", duration: "3:30", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/morning/01-morning-soft-arrival.mp3", locked: false },
+          { id: "mor-02", title: "02 Sunrise Harmony", artist: "WARSTREET BAND", duration: "4:00", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/morning/02-sunrise-harmony.mp3", locked: false },
+          { id: "mor-03", title: "03 Breakfast Flow", artist: "WARSTREET BAND", duration: "4:15", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/morning/03-breakfast-flow.mp3", locked: false },
+          { id: "mor-04", title: "04 Daylight Uplift", artist: "WARSTREET BAND", duration: "3:55", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/morning/04-daylight-uplift.mp3", locked: false },
+          { id: "mor-05", title: "05 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "mor-06", title: "06 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "mor-07", title: "07 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "mor-08", title: "08 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "mor-09", title: "09 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "mor-10", title: "10 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "mor-11", title: "11 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "mor-12", title: "12 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true }
+        ]
+      },
+      { 
+        id: "afternoon", label: "Afternoon Playlist", type: "time", 
+        tracks: [
+          { id: "aft-01", title: "01 Midday Balance", artist: "WARSTREET BAND", duration: "4:10", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/afternoon/01-midday-balance.mp3", locked: false },
+          { id: "aft-02", title: "02 Light Activity Flow", artist: "WARSTREET BAND", duration: "3:45", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/afternoon/02-light-activity-flow.mp3", locked: false },
+          { id: "aft-03", title: "03 Social Ambient Pulse", artist: "WARSTREET BAND", duration: "4:00", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/afternoon/03-social-ambient-pulse.mp3", locked: false },
+          { id: "aft-04", title: "04 Day Continuum", artist: "WARSTREET BAND", duration: "4:20", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/afternoon/04-day-continuum.mp3", locked: false },
+          { id: "aft-05", title: "05 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "aft-06", title: "06 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "aft-07", title: "07 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "aft-08", title: "08 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "aft-09", title: "09 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "aft-10", title: "10 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "aft-11", title: "11 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "aft-12", title: "12 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true }
+        ]
+      },
+      { 
+        id: "evening", label: "Evening Playlist", type: "time", 
+        tracks: [
+          { id: "eve-01", title: "01 Sunset Welcome", artist: "WARSTREET BAND", duration: "4:20", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/evening/01-sunset-welcome.mp3", locked: false },
+          { id: "eve-02", title: "02 Evening Lounge Flow", artist: "WARSTREET BAND", duration: "5:00", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/evening/02-evening-lounge-flow.mp3", locked: false },
+          { id: "eve-03", title: "03 Dinner Atmosphere", artist: "WARSTREET BAND", duration: "4:50", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/evening/03-dinner-atmosphere.mp3", locked: false },
+          { id: "eve-04", title: "04 Night Transition", artist: "WARSTREET BAND", duration: "4:10", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/evening/04-night-transition.mp3", locked: false },
+          { id: "eve-05", title: "05 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "eve-06", title: "06 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "eve-07", title: "07 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "eve-08", title: "08 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "eve-09", title: "09 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "eve-10", title: "10 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "eve-11", title: "11 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "eve-12", title: "12 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true }
+        ]
+      },
+      { 
+        id: "night", label: "Night Playlist", type: "time", 
+        tracks: [
+          { id: "nig-01", title: "01 Night Calm Entry", artist: "WARSTREET BAND", duration: "5:30", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/night/01-night-calm-entry.mp3", locked: false },
+          { id: "nig-02", title: "02 Deep Lounge Tone", artist: "WARSTREET BAND", duration: "6:00", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/night/02-deep-lounge-tone.mp3", locked: false },
+          { id: "nig-03", title: "03 Late Night Drift", artist: "WARSTREET BAND", duration: "5:15", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/night/03-late-night-drift.mp3", locked: false },
+          { id: "nig-04", title: "04 Rest Transition", artist: "WARSTREET BAND", duration: "4:50", src: "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/holiday-inn/night/04-rest-transition.mp3", locked: false },
+          { id: "nig-05", title: "05 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "nig-06", title: "06 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "nig-07", title: "07 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "nig-08", title: "08 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "nig-09", title: "09 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "nig-10", title: "10 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "nig-11", title: "11 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true },
+          { id: "nig-12", title: "12 Premium Track", artist: "WARSTREET BAND", duration: "---", src: null, locked: true }
+        ]
+      }
+    ],
+    info: [
+        { mode: "Why This Matters", title: "Music Shapes Guest Experience", desc: "Guests remember experiences over service alone. Branded playlists turn ambiance into identity, loyalty, and memory." },
+        { mode: "Business Impact", title: "Branded Audio Benefits", desc: "• Increases average guest stay time<br>• Enhances mood and energy consistency<br>• Builds emotional brand association" }
+    ]
+  },
+  "warstreet": {
+    slug: "warstreet",
+    name: "WARSTREET STUDIOS",
+    tagline: "Sonic Branding Expertise · Custom Audio Scapes",
+    whatsapp: "263779388560?text=Hello%20WarStreet%20Studios,%20I%20am%20interested%20in%20custom%20audio%20branding.",
+    theme: {
+      primary: "#111111",
+      accent: "#FF4444"
+    },
+    playlists: [
+      {
+        id: "demo",
+        label: "Studio Showcase",
+        type: "intro",
+        tracks: [
+          { id: "w1", title: "Studio Pulse", artist: "Warstreet Band", file: "StudioPulse", duration: "2:50" },
+          { id: "w2", title: "Creative Flow", artist: "Warstreet Band", file: "CreativeFlow", duration: "3:30" }
+        ]
+      },
+      { id: "experience", label: "Core Experience", type: "core", tracks: [] },
+      { id: "morning", label: "Morning Playlist", type: "time", tracks: [] },
+      { id: "afternoon", label: "Afternoon Playlist", type: "time", tracks: [] },
+      { id: "evening", label: "Evening Playlist", type: "time", tracks: [] },
+      { id: "night", label: "Night Playlist", type: "time", tracks: [] }
+    ],
+    info: [
+        { mode: "Our Vision", title: "Sound as Strategy", desc: "We don't just make music; we build audio assets that grow business value." }
+    ]
+  },
+  "nandos": {
+    slug: "nandos",
+    name: "Nando’s",
+    tagline: "Flame-Grilled Flavor · Sonic PERi-Identity",
+    whatsapp: "263779388560?text=Hello%20WarStreet%20Studios,%20I%20am%20interested%20in%20the%20Nando’s%20sonic%20branding.",
+    theme: {
+      primary: "#E51A12",
+      accent: "#FFB000"
+    },
+    playlists: [
+      {
+        id: "demo",
+        label: "Demo Experience",
+        type: "intro",
+        tracks: [
+          { "id": "nd-arrival", "title": "Nando’s Welcome Flame", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND01.mp3" },
+          { "id": "nd-lobby", "title": "Lobby Spice", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND02.mp3" },
+          { "id": "nd-brunch", "title": "Sunlit PERi-Brunch", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND03.mp3" },
+          { "id": "nd-day", "title": "Patio Chill", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND04.mp3" },
+          { "id": "nd-corporate", "title": "Flame Executive", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND05.mp3" },
+          { "id": "nd-cocktail", "title": "Twilight PERi-Hour", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND06.mp3" },
+          { "id": "nd-dinner", "title": "Gourmet PERi-Nights", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND07.mp3" },
+          { "id": "nd-sunset", "title": "Orange Ember", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND08.mp3" },
+          { "id": "nd-night", "title": "Dark Flame Lounge", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND09.mp3" },
+          { "id": "nd-event", "title": "Signature PERi-Events", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND10.mp3" },
+          { "id": "nd-late", "title": "Midnight PERi-Vibe", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND11.mp3" },
+          { "id": "nd-closure", "title": "Ember Closure", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/Nandos/Demo/ND12.mp3" }
+        ]
+      },
+      { id: "experience", label: "Core Experience", type: "core", tracks: [] },
+      { id: "morning", label: "Morning Playlist", type: "time", tracks: [] },
+      { id: "afternoon", label: "Afternoon Playlist", type: "time", tracks: [] },
+      { id: "evening", label: "Evening Playlist", type: "time", tracks: [] },
+      { id: "night", label: "Night Playlist", type: "time", tracks: [] }
+    ],
+    info: [
+        { mode: "Flame & Flavor", title: "Global Grill", desc: "Experience the heat of Portuguese-Mozambican roots through a refined Afro-Luso sonic palette." }
+    ]
+  },
+  "gava": {
+    slug: "gava",
+    name: "GAVA'S",
+    tagline: "Authentic Zimbabwean Flavors · Cultural Sonic Identity",
+    whatsapp: "263779388560?text=Hello%20WarStreet%20Studios,%20I%20am%20interested%20in%20the%20Gava's%20sonic%20branding.",
+    theme: {
+      primary: "#E67E22",
+      accent: "#D35400"
+    },
+    playlists: [
+      {
+        id: "demo",
+        label: "Demo Experience",
+        type: "intro",
+        tracks: [
+          { "id": "arrival", "title": "Arrival — Sadza Welcome", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_arrival_sadza-welcome_v2.mp3" },
+          { "id": "ambient", "title": "Belgravia Breeze", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_ambient_belgravia-breeze_v1.mp3" },
+          { "id": "lunch", "title": "Soulful Lunch", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_lunch_soulful-lunch_v1.mp3" },
+          { "id": "soul-session", "title": "Soul Session Mix", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_soul_soul-session-mix_v1.mp3" },
+          { "id": "lounge", "title": "Jazz Garden Lounge", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_lounge_jazz-garden-lounge_v1.mp3" },
+          { "id": "social", "title": "Grill Gather", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_social_grill-gather_v1.mp3" },
+          { "id": "culture", "title": "Cultural Echo Beat", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_culture_cultural-echo-beat_v1.mp3" },
+          { "id": "heritage", "title": "Heritage Rhythms", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_heritage_heritage-rhythms_v1.mp3" },
+          { "id": "afternoon", "title": "Late Afternoon Pulse", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_afternoon_late-afternoon-pulse_v1.mp3" },
+          { "id": "sunset", "title": "Live Band Sunset", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_sunset_live-band-sunset_v1.mp3" },
+          { "id": "evening", "title": "Evening Unite", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_evening_evening-unite_v1.mp3" },
+          { "id": "winddown", "title": "Twilight Heritage", "artist": "WARSTREET BAND", "duration": "—", "src": "https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/gava/Demo/gavas_winddown_twilight-heritage_v1.mp3" }
+        ]
+      },
+      { id: "experience", label: "Core Experience", type: "core", tracks: [] },
+      { id: "morning", label: "Morning Playlist", type: "time", tracks: [] },
+      { id: "afternoon", label: "Afternoon Playlist", type: "time", tracks: [] },
+      { id: "evening", label: "Evening Playlist", type: "time", tracks: [] },
+      { id: "night", label: "Night Playlist", type: "time", tracks: [] }
+    ],
+    info: [
+        { mode: "Cultural Essence", title: "Soul of Zimbabwe", desc: "Traditional flavors meets modern sonic scapes. Curated for the ultimate Belgravia garden experience." }
+    ]
+  }
+};
+
+
+
+// ==============================
+// SECTION: STATE
+// ==============================
+
+// Global state initialization
+let currentTheme = localStorage.getItem("themeMode") || "dark";
+let currentBrandSlug = null;
+let currentPlaylistId = null;
+let activePlaylistIdx = 0;
+let activeAudio = null;
+let activeTrackId = null;
+
+let activeTrackIds = [];
+
+// ==============================
+// SECTION: ROUTER (init / URL logic)
+// ==============================
+
+// App entry point and routing logic
+function init() {
+    setGlobalTheme(currentTheme);
+    
+    const params = new URLSearchParams(window.location.search);
+    let brandSlug = params.get("brand");
+    const mode = params.get("mode");
+
+    // Validate brand exists
+    if (brandSlug && !BRANDS[brandSlug]) {
+        console.warn(`System: Brand [${brandSlug}] not found. Falling back.`);
+        brandSlug = "holiday-inn";
+    }
+
+    // Determine initial view mode
+    // priority: mode param -> brand param -> default hub
+    let finalMode = mode;
+    if (!finalMode) {
+        if (brandSlug) finalMode = "gateway";
+        else finalMode = "hub";
+    }
+
+    if (finalMode === "hub") {
+        renderHub();
+    } else if (finalMode === "gateway") {
+        renderGateway(brandSlug || "holiday-inn");
+    } else {
+        const finalSlug = brandSlug || "holiday-inn";
+        renderBrand(finalSlug);
+        // Track async
+        setTimeout(() => track("brand_view", { brand: finalSlug }), 10);
+    }
+}
+
+function resetBrand() {
+    history.replaceState(null, "", window.location.pathname);
+    renderHub();
+}
+
+// Global interaction lock initialization
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.onkeydown = function(e){
+  if(e.keyCode==123) return false;
+  if(e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) return false;
+  if(e.ctrlKey && e.key.toLowerCase()=='u') return false;
+};
+document.body.onselectstart = () => false;
+document.body.ondragstart = () => false;
+
+// Set window load trigger
+window.onload = init;
+
+// ==============================
+// SECTION: BRAND GATEWAY (NEW LAYER)
+// ==============================
+
+function setGlobalTheme(mode) {
+    currentTheme = mode;
+    localStorage.setItem("themeMode", mode);
+    if (mode === "light") {
+        document.body.classList.add("light-mode");
+    } else {
+        document.body.classList.remove("light-mode");
+    }
+}
+
+const GATEWAY_THEMES = {
+    "holiday-inn": {
+        primary: "#1D6247",
+        background: "#FFFFFF",
+        accent: "#004731",
+        intro: "Step into the sonic identity of modern hospitality. Experience the sound of belonging."
+    },
+    "warstreet": {
+        primary: "#111111",
+        background: "#080808",
+        accent: "#D4AF37",
+        intro: "Enter the forge of cinematic audio. Where high-stakes strategy meets sonic precision."
+    },
+    "gava": {
+        primary: "#E67E22",
+        background: "#080808",
+        accent: "#D35400",
+        intro: "Taste the heritage. Hear the culture. Welcome to the Gava's sonic garden."
+    },
+    "nandos": {
+        primary: "#E51A12",
+        background: "#080808",
+        accent: "#FFB000",
+        intro: "Fuel the fire. Feel the rhythm. Step into the Nando’s PERi-Sonic world."
+    },
+    "default": {
+        primary: "#1D6247",
+        background: "#080808",
+        accent: "#1EBB72",
+        intro: "Initializing brand sonic gateway. Select your target experience."
+    }
+};
+
+function renderGateway(slug) {
+    const brand = BRANDS[slug] || BRANDS[Object.keys(BRANDS)[0]];
+    const theme = GATEWAY_THEMES[slug] || GATEWAY_THEMES["default"];
+    
+    // URL Sync (v5.0)
+    const newUrl = "?brand=" + slug;
+    if (window.location.search !== newUrl && !window.location.search.includes('mode=gateway')) {
+        history.replaceState(null, "", newUrl);
+    }
+    
+    // Apply Theme
+    applyTheme({
+        primary: theme.primary,
+        accent: theme.accent
+    });
+    
+    // Hide Header
+    document.querySelector(".header").style.display = "none";
+    if(document.getElementById("insight-bar")) document.getElementById("insight-bar").style.display = "none";
+
+    const container = document.getElementById("playlist-container");
+    container.className = ""; // Remove grid
+    container.innerHTML = `
+        <div class="gateway-wrap" id="gate-wrap">
+            <!-- Environmental Lighting -->
+            <div class="street-light-beam"></div>
+            <div class="street-light-beam"></div>
+
+            <div class="theme-switcher">
+                <button class="theme-btn" onclick="toggleGlobalTheme()">
+                    <span id="theme-icon">${currentTheme === 'light' ? '🌙 DARK MODE' : '☀️ LIGHT MODE'}</span>
+                </button>
+            </div>
+
+            <div class="gateway-identity">
+                <h1>${brand.name.toUpperCase()}</h1>
+                <p>${brand.tagline}</p>
+            </div>
+            
+            <div class="gateway-intro">
+                ${theme.intro}
+            </div>
+
+            <div class="gate-grid">
+                <div class="gate-card playlist" onclick="renderBrand('${slug}')">
+                    <div class="striplight-top"></div>
+                    <div class="gate-halo"></div>
+                    <div class="gate-title">Playlist Experience</div>
+                    <div class="gate-desc">Explore the curated sonic collection</div>
+                </div>
+                
+                <div class="gate-card control" onclick="showControlRoomGate()">
+                    <div class="striplight-top"></div>
+                    <div class="gate-halo"></div>
+                    <div class="gate-title">Sonic Control Room <span class="gate-phase-label">PHASE 2</span></div>
+                    <div class="gate-desc">Advanced audio engineering environment</div>
+                </div>
+            </div>
+
+            <div class="gate-conversion-layer">
+                <button class="gate-cta-btn" onclick="contactWarstreet()">
+                    Contact Warstreet Studios
+                </button>
+                
+                <div class="gate-share-wrap">
+                    <button class="gate-share-btn" onclick="toggleShareGate(event)">
+                        Share Experience
+                    </button>
+                    <div id="gate-share-panel" class="gate-share-panel">
+                        <div class="share-option" onclick="sharePlatform('whatsapp')">WhatsApp</div>
+                        <div class="share-option" onclick="sharePlatform('instagram')">Instagram</div>
+                        <div class="share-option" onclick="sharePlatform('facebook')">Facebook</div>
+                        <div class="share-option" onclick="sharePlatform('copy')">Copy Link</div>
+                    </div>
+                </div>
+
+                <div class="gate-powered">
+                    Powered-by Warstreet Experience Model
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Reset layout for other containers
+    document.getElementById("whatsapp-container").style.display = "none";
+    document.getElementById("info-container").style.display = "none";
+}
+
+function toggleGlobalTheme() {
+    const icon = document.getElementById("theme-icon");
+    const newMode = currentTheme === "dark" ? "light" : "dark";
+    
+    setGlobalTheme(newMode);
+    
+    if (icon) {
+        icon.innerText = newMode === "light" ? "🌙 DARK MODE" : "☀️ LIGHT MODE";
+    }
+}
+
+// Gateway Conversion Logic
+function contactWarstreet() {
+    const phone = "263779388560";
+    const msg = encodeURIComponent("Hello Warstreet Studios,\nI’ve just experienced your Sonic Branding System and I’m interested in building a branded audio experience for my business.\nLet’s discuss how we can create something powerful.");
+    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+}
+
+function toggleShareGate(e) {
+    e.stopPropagation();
+    const panel = document.getElementById("gate-share-panel");
+    panel.classList.toggle("active");
+}
+
+function showControlRoomGate() {
+    const overlay = document.createElement("div");
+    overlay.id = "system-gate-overlay";
+    overlay.className = "system-gate-overlay";
+    overlay.innerHTML = `
+        <div class="gate-glow"></div>
+        <div class="gate-content-box">
+            <div class="gate-badge">LOCKED</div>
+            <div class="gate-title-main">Sonic Control Room</div>
+            <div class="gate-subtext">Phase Two Activation Required</div>
+            <p class="gate-desc-text">
+                This system is currently reserved for partner environments.<br>
+                Advanced automation, time-based sonic intelligence, and dynamic control will be unlocked in the next phase.
+            </p>
+            <button class="gate-main-btn" onclick="closeControlRoomGate()">
+                Return to Playlist Experience
+            </button>
+            <div class="gate-footer-brand">
+                Powered by WarStreet Sonic Engine
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function closeControlRoomGate() {
+    const overlay = document.getElementById("system-gate-overlay");
+    if (overlay) {
+        overlay.style.opacity = "0";
+        overlay.style.transform = "scale(0.98)";
+        overlay.style.transition = "all 0.4s cubic-bezier(0.2, 0, 0, 1)";
+        setTimeout(() => overlay.remove(), 400);
+    }
+}
+
+function sharePlatform(platform) {
+    const url = window.location.href;
+    const msg = encodeURIComponent(`I just experienced a next-level Sonic Branding system by Warstreet Studios.\nThis is how brands should sound in 2026.\nCheck it out: ${url}`);
+    
+    switch(platform) {
+        case 'whatsapp':
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+            break;
+        case 'facebook':
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+            break;
+        case 'instagram':
+            // Instagram doesn't have a direct share URL helper like FB, usually mobile app deep link or just notify user
+            alert("Copying link for Instagram...");
+            navigator.clipboard.writeText(`I just experienced a next-level Sonic Branding system by Warstreet Studios. This is how brands should sound in 2026. Check it out: ${url}`);
+            break;
+        case 'copy':
+            navigator.clipboard.writeText(url);
+            alert("Experience Link Copied!");
+            break;
+    }
+    document.getElementById("gate-share-panel").classList.remove("active");
+}
+
+// ==============================
+// SECTION: RENDER HUB
+// ==============================
+
+let prevRankingSlugs = [];
+let pollInterval = null;
+
+// Render the Master Control Hub
+function renderHub() {
+    // 1. READ LOCAL DATA IMMEDIATELY
+    const current = JSON.parse(localStorage.getItem("sonic_analytics") || "[]");
+    const history = JSON.parse(localStorage.getItem("sonic_analytics_history") || "[]");
+    
+    // Initial Render with Local Data
+    renderHubContent(current, history, null);
+
+    // 2. START LIVE POLLING
+    if (!pollInterval) {
+        pollInterval = setInterval(() => {
+            const current = JSON.parse(localStorage.getItem("sonic_analytics") || "[]");
+            const history = JSON.parse(localStorage.getItem("sonic_analytics_history") || "[]");
+            fetchCloudAnalytics(current, history);
+        }, 5000);
+    }
+    
+    // Immediate fetch
+    fetchCloudAnalytics(current, history);
+}
+
+function fetchCloudAnalytics(current, history) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+
+    fetch("https://warstreet-analytics.warstreett.workers.dev/analytics", { signal: controller.signal })
+        .then(res => res.ok ? res.json() : null)
+        .then(cloudData => {
+            clearTimeout(timeout);
+            if (cloudData) {
+                renderHubContent(current, history, cloudData);
+            }
+        })
+        .catch(() => {
+            clearTimeout(timeout);
+        });
+}
+
+
+// Internal Core Hub Renderer
+function renderHubContent(current, history, cloudData) {
+    // 1. PROCESS DATA
+    const stats = {};
+    const lifetime = {};
+
+    Object.keys(BRANDS).forEach(slug => {
+        stats[slug] = { views: 0, plays: 0, clicks: 0 };
+        lifetime[slug] = { views: 0, plays: 0, clicks: 0, timestamps: [], lastActive: 0 };
+    });
+
+    const processEvents = (events, statsMap, trackTime = false) => {
+        events.forEach(log => {
+            let eventType = log.event;
+            // Map legacy events to new strict types if needed
+            if (eventType === "brand_view") eventType = "view";
+            if (eventType === "audio_play") eventType = "play";
+            if (eventType === "cta_click") eventType = "click";
+
+            const slug = log.brand || (log.data ? log.data.brand : null);
+            if (slug && BRANDS[slug]) {
+                if (statsMap[slug]) {
+                    if (eventType === "view") statsMap[slug].views++;
+                    if (eventType === "play") statsMap[slug].plays++;
+                    if (eventType === "click") statsMap[slug].clicks++;
+                }
+                if (trackTime) {
+                    const t = log.timestamp || log.time;
+                    if (t) {
+                        lifetime[slug].timestamps.push(t);
+                        if (t > lifetime[slug].lastActive) lifetime[slug].lastActive = t;
+                    }
+                }
+            }
+        });
+    };
+
+    // Calculate current session stats
+    processEvents(current, stats, true);
+
+    // Populate Lifetime stats
+    if (cloudData && cloudData.brands) {
+        // Use Backend Aggregated Data
+        Object.keys(cloudData.brands).forEach(slug => {
+            if (lifetime[slug]) {
+                lifetime[slug].views = cloudData.brands[slug].views || 0;
+                lifetime[slug].plays = cloudData.brands[slug].plays || 0;
+                lifetime[slug].clicks = cloudData.brands[slug].clicks || 0;
+            }
+        });
+        // Merge current session into lifetime for optimistic feel
+        Object.keys(stats).forEach(slug => {
+            lifetime[slug].views += stats[slug].views;
+            lifetime[slug].plays += stats[slug].plays;
+            lifetime[slug].clicks += stats[slug].clicks;
+        });
+    } else {
+        // Fallback to local history
+        processEvents(current, lifetime, true);
+        history.forEach(session => processEvents(session.data, lifetime, true));
+    }
+
+    // Intelligence Layer: Behavior Analytics
+    const now = Date.now();
+    const TEN_MINS = 10 * 60 * 1000;
+
+    const ranking = Object.keys(BRANDS).map(slug => {
+        const l = lifetime[slug];
+        
+        // Metrics
+        const score = (l.views * 1) + (l.plays * 3) + (l.clicks * 5);
+        const total = l.views + l.plays + l.clicks;
+        const conv = l.views > 0 ? l.clicks / l.views : 0;
+        const pRate = l.views > 0 ? l.plays / l.views : 0;
+        
+        // Spike detection: events in last 10 mins
+        const recentEvents = l.timestamps.filter(t => (now - t) < TEN_MINS).length;
+        const isSpiking = recentEvents >= 3;
+
+        // Prioritized Insight
+        let insight = null;
+        let behavior = "normal";
+
+        if (isSpiking) {
+            insight = "Spike detected — brand gaining attention";
+            behavior = "spike";
+        } else if (l.views >= 5 && conv < 0.1) {
+            insight = "High traffic, low conversion — improve call-to-action";
+            behavior = "low-conv";
+        } else if (pRate >= 0.5 && l.views >= 3) {
+            insight = "Strong engagement — audio experience performing well";
+            behavior = "strong";
+        } else if (l.views > 0 && l.plays === 0) {
+            insight = "Dead zone — experience needs a stronger hook";
+            behavior = "dead";
+        } else if (total < 2 && total > 0) {
+            insight = "Low activity — visibility or reach may be limited";
+            behavior = "low";
+        }
+
+        return { slug, score, total, conv, pRate, insight, behavior, lastActive: l.lastActive };
+    }).sort((a, b) => b.score - a.score);
+
+    const topBrand = ranking[0];
+    const topSlug = topBrand.score > 0 ? topBrand.slug : null;
+
+    // Rank Shift Detection
+    const currentRankingSlugs = ranking.map(r => r.slug);
+    const hasRankShift = JSON.stringify(currentRankingSlugs) !== JSON.stringify(prevRankingSlugs);
+    prevRankingSlugs = currentRankingSlugs;
+
+    // Insight Bar Refinement
+    const insightBar = document.getElementById("insight-bar");
+    if (topBrand.score > 0) {
+        const topInsights = ranking.filter(r => r.insight).slice(0, 3);
+        insightBar.innerHTML = topInsights.map(r => `
+            <div class="insight-item">
+                <span class="insight-label">${BRANDS[r.slug].name.toUpperCase()}:</span> 
+                ${r.insight}
+            </div>
+        `).join("") || `<div class="insight-item"><span class="insight-label">SYSTEM:</span> Monitoring brand performance...</div>`;
+        insightBar.style.display = "flex";
+    } else {
+        insightBar.style.display = "none";
+    }
+
+    // 2. UI SETUP
+    applyTheme(BRANDS["warstreet"].theme);
+    document.getElementById("brand-name").innerText = "SOUND HUB";
+    document.getElementById("brand-tagline").innerText = "WARSTREET COMMAND CENTER · SYSTEM v3.5";
+    
+    // Inject Header Controls
+    const historyLabel = cloudData ? "Cloud" : history.length;
+    const unreadCount = notifications.filter(n => !n.read).length;
+    
+    document.getElementById("header-controls").innerHTML = `
+        <div class="notification-wrap">
+            <button class="action-btn icon-btn ${unreadCount > 0 ? 'has-new' : ''}" onclick="toggleNotifications(event)">
+                <span class="icon">🔔</span>
+                ${unreadCount > 0 ? `<span class="noti-badge">${unreadCount}</span>` : ''}
+            </button>
+            <div id="noti-panel" class="noti-panel">
+                <div class="noti-header">SYSTEM ALERTS</div>
+                <div id="noti-list" class="noti-list"></div>
+            </div>
+        </div>
+        <button class="action-btn" onclick="toggleHistory()">History (${historyLabel})</button>
+        <button class="action-btn secondary" onclick="exportAnalytics()">Export</button>
+        <button class="action-btn secondary" onclick="resetAnalytics()">Reset</button>
+    `;
+
+    // Process Notifications for this update
+    if (cloudData) {
+        // Ranking Change Alert
+        if (hasRankShift && topSlug && prevRankingSlugs.length > 0) {
+            createNotification({
+                type: "performance", 
+                brand: topSlug, 
+                message: `${BRANDS[topSlug].name} is now leading the cluster.`
+            });
+        }
+
+        // Behavior/Insight Alerts
+        ranking.forEach(r => {
+            if (r.insight) {
+                const type = r.behavior === 'spike' ? 'behavior' : 'insight';
+                createNotification({
+                    type: type, 
+                    brand: r.slug, 
+                    message: r.insight
+                });
+            }
+        });
+    }
+
+    const container = document.getElementById("playlist-container");
+    container.innerHTML = "";
+    document.getElementById("whatsapp-container").style.display = "none";
+    document.getElementById("info-container").style.display = "none";
+
+    // 3. RENDER SYSTEM PANELS
+    Object.keys(BRANDS).forEach(slug => {
+        const brand = BRANDS[slug];
+        const cardStats = stats[slug];
+        const lifeStats = lifetime[slug];
+        const behaviorInfo = ranking.find(r => r.slug === slug);
+        const isLeading = slug === topSlug;
+        
+        // Extract RGB for backlight
+        const rgb = hexToRgb(brand.theme.primary);
+        const cardStyleVars = rgb ? `--card-glow-rgb: ${rgb.r}, ${rgb.g}, ${rgb.b};` : '';
+
+        const cardWrap = document.createElement("div");
+        cardWrap.className = `card-wrap ${isLeading ? 'leading' : ''} ${behaviorInfo ? behaviorInfo.behavior : ''} ${hasRankShift ? 'rank-shift' : ''}`;
+        cardWrap.style = cardStyleVars;
+        
+        cardWrap.innerHTML = `
+            <div class="backlight"></div>
+            ${isLeading ? '<div class="leading-badge">LEADING</div>' : ''}
+            <div class="card">
+                <div style="height:2px; background:${brand.theme.primary}; width:100%; position:relative; z-index:1; box-shadow: 0 0 15px ${brand.theme.primary}AA;"></div>
+                <div class="card-section" style="background:linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%); padding: 12px 18px;">
+                    <div class="mode">PROJECT: [${slug.toUpperCase()}]</div>
+                    <div class="title">${brand.name}</div>
+                    <div style="position:absolute; top:8px; right:10px; font-size:8px; opacity:0.15; font-weight:900; font-family:monospace;">ID_PR_0${Object.keys(BRANDS).indexOf(slug)+1}</div>
+                </div>
+                <div class="card-section" style="padding: 15px 18px;">
+                    <button onclick="renderGateway('${slug}')" class="action-btn primary-command" style="width:100%;">INITIALIZE CONTROLLER</button>
+                    ${behaviorInfo && behaviorInfo.insight ? `
+                        <div style="font-size:8px; color:var(--brand-accent); font-family:monospace; margin-top:8px; text-transform:uppercase; font-weight:900; opacity:0.8;">
+                           [!] ${behaviorInfo.insight}
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="card-section" style="padding: 12px 18px;">
+                    <div class="mode">Session Data</div>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">VIEWS</div>
+                            <div class="stat-value" id="cur-v-${slug}">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">PLAYS</div>
+                            <div class="stat-value" id="cur-p-${slug}">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">CLICKS</div>
+                            <div class="stat-value" id="cur-c-${slug}">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-section" style="background:rgba(0,0,0,0.2); padding: 12px 18px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="mode">Global Sync</div>
+                        <div style="font-size:7px; opacity:0.4; font-family:monospace;">ACT: ${behaviorInfo.lastActive > 0 ? formatTimeShort(behaviorInfo.lastActive) : '---'}</div>
+                    </div>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">V.TOTAL</div>
+                            <div class="stat-value" id="life-v-${slug}" style="font-size:15px; opacity:0.6;">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">P.TOTAL</div>
+                            <div class="stat-value" id="life-p-${slug}" style="font-size:15px; opacity:0.6;">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">C.TOTAL</div>
+                            <div class="stat-value" id="life-c-${slug}" style="font-size:15px; opacity:0.6;">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.appendChild(cardWrap);
+        
+        // Animate stats
+        setTimeout(() => {
+            animateNumber(`cur-v-${slug}`, cardStats.views);
+            animateNumber(`cur-p-${slug}`, cardStats.plays);
+            animateNumber(`cur-c-${slug}`, cardStats.clicks);
+            animateNumber(`life-v-${slug}`, lifeStats.views);
+            animateNumber(`life-p-${slug}`, lifeStats.plays);
+            animateNumber(`life-c-${slug}`, lifeStats.clicks);
+        }, 100);
+    });
+
+    // 4. PREPARE MODAL CONTENT
+    const modalBody = document.getElementById("historyModalBody");
+    modalBody.innerHTML = "";
+    
+    if (cloudData) {
+        const cStats = { views: 0, plays: 0, clicks: 0 };
+        cloudData.forEach(log => {
+            if (log.event === "brand_view") cStats.views++;
+            if (log.event === "audio_play") cStats.plays++;
+            if (log.event === "cta_click") cStats.clicks++;
+        });
+        const cloudBox = document.createElement("div");
+        cloudBox.style = "background:#f0f7f4; border:1px solid #c8e6d9; border-radius:4px; padding:15px; margin-bottom:15px;";
+        cloudBox.innerHTML = `
+            <div class="mode" style="color:#2d7a5b;">Sync: Cloud Data Hub</div>
+            <div class="stat-grid" style="margin-top:10px;">
+                <div class="stat-item"><div class="stat-label">Views</div><div class="stat-value">${cStats.views}</div></div>
+                <div class="stat-item"><div class="stat-label">Plays</div><div class="stat-value">${cStats.plays}</div></div>
+                <div class="stat-item"><div class="stat-label">Clicks</div><div class="stat-value">${cStats.clicks}</div></div>
+            </div>
+        `;
+        modalBody.appendChild(cloudBox);
+    }
+
+    if (history.length === 0 && !cloudData) {
+        modalBody.innerHTML = '<div style="text-align:center; padding:40px; color:#999; font-size:12px; font-style:italic;">No archival records found.</div>';
+    } else {
+        [...history].reverse().forEach(session => {
+            const sEvents = session.data;
+            if (!sEvents || sEvents.length === 0) return;
+            
+            // Get unique brands in this session
+            const brandSet = new Set();
+            sEvents.forEach(e => {
+                const slug = e.brand || (e.data?.brand);
+                if (slug && BRANDS[slug]) brandSet.add(BRANDS[slug].name);
+            });
+            const brandsFound = Array.from(brandSet).join(", ") || "General Activity";
+
+            const sStats = { views: 0, plays: 0, clicks: 0 };
+            sEvents.forEach(log => {
+                if (log.event === "brand_view") sStats.views++;
+                if (log.event === "audio_play") sStats.plays++;
+                if (log.event === "cta_click") sStats.clicks++;
+            });
+
+            // Aggregate unique track plays with metadata
+            const tracksPlayed = [];
+            const trackIdsSeen = new Set();
+            
+            sEvents.forEach(log => {
+                if (log.event === "audio_play") {
+                    const slug = log.brand || (log.data?.brand);
+                    const tid = log.track || (log.data?.track);
+                    if (slug && tid && BRANDS[slug]) {
+                        // Find track in tiered playlist structure (v3.6)
+                        let trackMeta = null;
+                        BRANDS[slug].playlists.forEach(pl => {
+                            const found = pl.tracks.find(t => t.id === tid);
+                            if (found) trackMeta = found;
+                        });
+                        
+                        if (trackMeta && !trackIdsSeen.has(tid)) {
+                            tracksPlayed.push(trackMeta);
+                            trackIdsSeen.add(tid);
+                        }
+                    }
+                }
+            });
+
+            const box = document.createElement("div");
+            box.style = "border:1px solid #333; border-radius:4px; padding:15px; margin-bottom:10px; background:#0D0D0D;";
+            
+            let trackListHtml = "";
+            if (tracksPlayed.length > 0) {
+                trackListHtml = `
+                    <div style="margin-top:15px; border-top:1px solid #222; padding-top:10px;">
+                        <div class="mode" style="margin-bottom:8px; opacity:0.8;">Track Activity</div>
+                        ${tracksPlayed.map(t => `
+                            <div style="margin-bottom:8px; padding-left:8px; border-left:1px solid var(--brand-primary);">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                    <div class="title" style="font-size:11px; color:#EEE;">${t.title}</div>
+                                    <div style="font-family:monospace; font-size:8px; opacity:0.4;">ID:${t.id.toUpperCase()}</div>
+                                </div>
+                                <div class="mode" style="font-size:8px; color:#888; margin:2px 0;">MODE: ${t.mode}</div>
+                                <div style="font-size:9px; color:#555; font-style:italic;">"${t.description}"</div>
+                            </div>
+                        `).join("")}
+                    </div>
+                `;
+            }
+
+            box.innerHTML = `
+                <div class="title" style="font-size:14px; margin-bottom: 2px; color:#FFF;">${brandsFound}</div>
+                <div class="mode" style="color:#666;">${formatTime(sEvents[0].time)}</div>
+                <div class="stat-grid" style="margin-top:12px;">
+                    <div class="stat-item"><div class="stat-label">Views</div><div class="stat-value" style="font-size:18px; color:#FFF;">${sStats.views}</div></div>
+                    <div class="stat-item"><div class="stat-label">Plays</div><div class="stat-value" style="font-size:18px; color:#FFF;">${sStats.plays}</div></div>
+                    <div class="stat-item"><div class="stat-label">Clicks</div><div class="stat-value" style="font-size:18px; color:#FFF;">${sStats.clicks}</div></div>
+                </div>
+                ${trackListHtml}
+            `;
+            modalBody.appendChild(box);
+        });
+    }
+}
+
+
+
+// ==============================
+// SECTION: Render an individual brand experience
+function renderBrand(slug) {
+    if (!BRANDS[slug]) slug = "holiday-inn";
+    currentBrandSlug = slug;
+    
+    // URL Sync (v5.0)
+    const newUrl = `?brand=${slug}&mode=brand`;
+    if (window.location.search !== newUrl) {
+        history.replaceState(null, "", newUrl);
+    }
+
+    const brand = BRANDS[slug];
+    
+    // Default to the first playlist index
+    activePlaylistIdx = 0;
+    
+    applyTheme(brand.theme);
+
+    // Header Controls
+    document.getElementById("header-controls").innerHTML = `
+        <button class="action-btn secondary" onclick="resetBrand()">SYSTEM RESET</button>
+    `;
+
+    document.getElementById("brand-name").innerText = brand.name;
+    document.getElementById("brand-tagline").innerText = brand.tagline;
+    
+    const container = document.getElementById("playlist-container");
+    container.innerHTML = `
+        <div id="playlist-nodes" class="playlist-node-wrap"></div>
+        
+        <div id="hero-player-mount" class="hero-player">
+            <div class="hero-player-content">
+                <div class="hero-info">
+                    <div id="hero-track-name" class="hero-track-name">Select Track</div>
+                    <div id="hero-track-artist" class="hero-track-artist">WarStreet Band</div>
+                </div>
+                <div class="hero-btn" onclick="toggleActiveAudio()">
+                    <span id="hero-play-icon">▶</span>
+                </div>
+            </div>
+            <div class="hero-progress-area">
+                <div id="hero-progress-bg" class="hero-progress-bg" onclick="seekAudio(event)">
+                    <div id="hero-progress-fill" class="hero-progress-fill"></div>
+                </div>
+                <div class="hero-time-row">
+                    <span id="hero-time-current">0:00</span>
+                    <span id="hero-time-duration">0:00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="playlist-view-container">
+            <div id="playlist-slider" class="playlist-slider"></div>
+        </div>
+        <div class="playlist-nav">
+            <button id="prev-btn" class="nav-btn" onclick="prevPlaylist()">Previous</button>
+            <button id="next-btn" class="nav-btn" onclick="nextPlaylist()">Next</button>
+        </div>
+    `;
+    container.className = "";
+    container.style.display = "block";
+
+    const nodeWrap = document.getElementById("playlist-nodes");
+    const slider = document.getElementById("playlist-slider");
+    
+    brand.playlists.forEach((pl, index) => {
+        // Create Node
+        const node = document.createElement("div");
+        node.className = `playlist-node ${index === 0 ? 'active' : ''}`;
+        node.id = `node-${index}`;
+        node.innerText = `#${(index).toString().padStart(2, '0')}`;
+        node.onclick = () => jumpToPlaylist(index);
+        nodeWrap.appendChild(node);
+
+        // Create Slide
+        const slide = document.createElement("div");
+        slide.className = "playlist-slide";
+        
+        slide.innerHTML = `
+            <div class="playlist-card active" id="pl-${pl.id}">
+                <div class="playlist-header">
+                    <div class="playlist-meta">
+                        <div class="playlist-idx">#${(index).toString().padStart(2, '0')}</div>
+                        <div class="playlist-name">${pl.label}</div>
+                    </div>
+                    <div class="playlist-count">${pl.tracks.length} Tracks</div>
+                </div>
+                <div class="track-list">
+                    ${pl.tracks.length > 0 ? pl.tracks.slice(0, 12).map(track => {
+                        const isPlaying = activeTrackId === track.id;
+                        return `
+                            <div class="track-item ${isPlaying ? 'playing' : ''}" id="item-${track.id}">
+                                <div class="track-play-btn" onclick="togglePlayback('${slug}', '${track.id}', '${track.src || track.file}', '${track.title.replace(/'/g, "\\'")}')">
+                                    ${isPlaying ? '⏸' : '▶'}
+                                </div>
+                                <div class="track-info">
+                                    <div class="track-name">${track.title} ${track.locked ? '<span style="font-size:8px; opacity:0.5; margin-left:4px;">🔒</span>' : ''}</div>
+                                    <div class="track-meta">${track.artist}</div>
+                                </div>
+                                <div class="track-duration">${track.locked ? 'LOCKED' : track.duration}</div>
+                            </div>
+                        `;
+                    }).join('') : '<div class="placeholder-msg">Playlist not yet available</div>'}
+                </div>
+            </div>
+        `;
+        slider.appendChild(slide);
+    });
+
+    // Initial sync
+    updatePlaylistSlider();
+
+    // Hide unnecessary sections
+    document.getElementById("whatsapp-container").style.display = "none";
+    document.getElementById("info-container").style.display = "none";
+    document.getElementById("footer-text").innerHTML = `WarStreet Studios · Sonic Engine v5.9`;
+
+    // State Restoration (v5.0)
+    if (['holiday-inn', 'gava', 'nandos'].includes(slug)) {
+        const lastTid = localStorage.getItem(`${slug}_last_tid`);
+        const lastTime = parseFloat(localStorage.getItem(`${slug}_last_time`) || 0);
+        if (lastTid) {
+            // Find track meta to restore hero view
+            let trackMeta = null;
+            brand.playlists.forEach(pl => {
+                const found = pl.tracks.find(t => t.id === lastTid);
+                if (found) trackMeta = found;
+            });
+            if (trackMeta) {
+                syncHeroPlayer(trackMeta.title, false);
+                const durEl = document.getElementById("hero-time-duration");
+                if (durEl) durEl.innerText = trackMeta.duration;
+            }
+        }
+    }
+}
+
+function jumpToPlaylist(index) {
+    activePlaylistIdx = index;
+    updatePlaylistSlider();
+}
+
+function nextPlaylist() {
+    const brand = BRANDS[currentBrandSlug];
+    if (activePlaylistIdx < brand.playlists.length - 1) {
+        activePlaylistIdx++;
+        updatePlaylistSlider();
+    }
+}
+
+function prevPlaylist() {
+    if (activePlaylistIdx > 0) {
+        activePlaylistIdx--;
+        updatePlaylistSlider();
+    }
+}
+
+function updatePlaylistSlider() {
+    const slider = document.getElementById('playlist-slider');
+    if (slider) {
+        slider.style.transform = `translateX(-${activePlaylistIdx * 100}%)`;
+    }
+    
+    // Update Node States
+    document.querySelectorAll('.playlist-node').forEach((node, idx) => {
+        if (idx === activePlaylistIdx) node.classList.add('active');
+        else node.classList.remove('active');
+    });
+
+    // Update Slide Active States for Motion Layer
+    document.querySelectorAll('.playlist-slide').forEach((slide, idx) => {
+        if (idx === activePlaylistIdx) slide.classList.add('active');
+        else slide.classList.remove('active');
+    });
+
+    // Update button states
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const brand = BRANDS[currentBrandSlug];
+    
+    if (prevBtn) prevBtn.disabled = activePlaylistIdx === 0;
+    if (nextBtn) nextBtn.disabled = activePlaylistIdx === brand.playlists.length - 1;
+}
+
+// Global Audio Controls
+function togglePlayback(brandSlug, trackId, file, title, initialTime = 0) {
+    if (!file || file === "null" || file === "undefined") return;
+
+    // Loading visual state
+    document.querySelectorAll('.hero-btn, .track-play-btn').forEach(el => {
+        if (el.onclick && el.onclick.toString().includes(trackId)) el.classList.add('loading');
+    });
+
+    // 1. Same track? Toggle
+    if (activeTrackId === trackId) {
+        if (!activeAudio.paused) {
+            activeAudio.pause();
+            syncMiniPlayer(false);
+            updateTrackUI(trackId, false);
+        } else {
+            activeAudio.play();
+            syncMiniPlayer(true);
+            updateTrackUI(trackId, true);
+        }
+        document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
+        return;
+    }
+
+    // 2. Different track? Stop previous
+    if (activeAudio) {
+        activeAudio.pause();
+        updateTrackUI(activeTrackId, false);
+    }
+
+    // 3. Initialize new audio
+    const filePath = file.startsWith('http') ? file : `/audio/${brandSlug}/${file}.mp3`;
+    activeAudio = new Audio(filePath);
+    activeTrackId = trackId;
+
+    if (initialTime > 0) activeAudio.currentTime = initialTime;
+    
+    activeAudio.play().then(() => {
+        document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
+        showMiniPlayer(title, brandSlug);
+        updateTrackUI(trackId, true);
+        syncHeroPlayer(title, true);
+        track('audio_play', { brand: brandSlug, track: trackId });
+    }).catch(err => {
+        document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
+        console.error("Audio playback error:", err);
+    });
+
+    activeAudio.onended = () => {
+        updateTrackUI(trackId, false);
+        syncMiniPlayer(false);
+        syncHeroPlayer(title, false);
+        
+        // Auto-Flow Logic (v5.0)
+        if (['holiday-inn', 'gava', 'nandos'].includes(currentBrandSlug)) {
+            playNextTrack();
+        } else {
+            activeTrackId = null;
+        }
+    };
+
+    activeAudio.ontimeupdate = () => {
+        const progress = (activeAudio.currentTime / activeAudio.duration) * 100;
+        
+        // Persistence (v5.0)
+        if (['holiday-inn', 'gava', 'nandos'].includes(currentBrandSlug)) {
+            localStorage.setItem(`${currentBrandSlug}_last_tid`, trackId);
+            localStorage.setItem(`${currentBrandSlug}_last_time`, activeAudio.currentTime);
+        }
+
+        // Mini Progress
+        const miniBar = document.getElementById("mini-progress");
+        if (miniBar) miniBar.style.width = progress + "%";
+
+        // Hero Progress
+        const heroBar = document.getElementById("hero-progress-fill");
+        if (heroBar) heroBar.style.width = progress + "%";
+
+        // Time Counters
+        const currentEl = document.getElementById("hero-time-current");
+        const durationEl = document.getElementById("hero-time-duration");
+        if (currentEl) currentEl.innerText = formatAudioTime(activeAudio.currentTime);
+        if (durationEl && !isNaN(activeAudio.duration)) durationEl.innerText = formatAudioTime(activeAudio.duration);
+    };
+}
+
+function showMiniPlayer(title, brandSlug) {
+    const player = document.getElementById("mini-player");
+    player.innerHTML = `
+        <div class="player-progress-container">
+            <div id="mini-progress" class="player-progress-bar"></div>
+        </div>
+        <div class="player-inner">
+            <div class="player-info">
+                <div class="player-title">${title}</div>
+                <div class="player-subtitle">WarStreet Band · ${BRANDS[brandSlug].name}</div>
+            </div>
+            <div class="player-controls">
+                <div class="player-btn" onclick="toggleActiveAudio()">
+                    <span id="mini-play-icon">⏸</span>
+                </div>
+            </div>
+        </div>
+    `;
+    player.classList.add("active");
+}
+
+function toggleActiveAudio() {
+    if (!activeAudio) {
+        // Memory Resumption (v5.0)
+        if (['holiday-inn', 'gava', 'nandos'].includes(currentBrandSlug)) {
+            const lastTid = localStorage.getItem(`${currentBrandSlug}_last_tid`);
+            const lastTime = parseFloat(localStorage.getItem(`${currentBrandSlug}_last_time`) || 0);
+            if (lastTid) {
+                const brand = BRANDS[currentBrandSlug];
+                let trackMeta = null;
+                brand.playlists.forEach(pl => {
+                    const found = pl.tracks.find(t => t.id === lastTid);
+                    if (found) trackMeta = found;
+                });
+                if (trackMeta) {
+                    togglePlayback(currentBrandSlug, trackMeta.id, trackMeta.src || trackMeta.file, trackMeta.title, lastTime);
+                    return;
+                }
+            }
+        }
+        return;
+    }
+    if (activeAudio.paused) {
+        activeAudio.play();
+        syncMiniPlayer(true);
+    } else {
+        activeAudio.pause();
+        syncMiniPlayer(false);
+    }
+}
+
+function seekAudio(e) {
+    if (!activeAudio || !activeAudio.duration) return;
+    const bar = document.getElementById('hero-progress-bg');
+    const rect = bar.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const width = rect.width;
+    const pct = Math.max(0, Math.min(1, x / width));
+    activeAudio.currentTime = pct * activeAudio.duration;
+}
+
+function playNextTrack() {
+    const brand = BRANDS[currentBrandSlug];
+    if (!brand) return;
+    const playlist = brand.playlists[activePlaylistIdx];
+    if (!playlist || playlist.tracks.length === 0) return;
+
+    const currentIdx = playlist.tracks.findIndex(t => t.id === activeTrackId);
+    let nextIdx = currentIdx + 1;
+    
+    // Loop back to start if finished
+    if (nextIdx >= playlist.tracks.length) nextIdx = 0;
+
+    const nextTrack = playlist.tracks[nextIdx];
+    if (nextTrack) {
+        togglePlayback(currentBrandSlug, nextTrack.id, nextTrack.src || nextTrack.file, nextTrack.title);
+    }
+}
+
+function syncMiniPlayer(isPlaying) {
+    const icon = document.getElementById("mini-play-icon");
+    if (icon) icon.innerText = isPlaying ? '⏸' : '▶';
+    
+    const heroIcon = document.getElementById("hero-play-icon");
+    if (heroIcon) heroIcon.innerText = isPlaying ? '⏸' : '▶';
+    
+    updateTrackUI(activeTrackId, isPlaying);
+}
+
+function syncHeroPlayer(title, isPlaying) {
+    const hero = document.getElementById("hero-player-mount");
+    const nameEl = document.getElementById("hero-track-name");
+    const icon = document.getElementById("hero-play-icon");
+    if (nameEl) nameEl.innerText = title;
+    if (icon) icon.innerText = isPlaying ? '⏸' : '▶';
+    
+    if (hero) {
+        if (isPlaying) hero.classList.add('playing');
+        else hero.classList.remove('playing');
+    }
+}
+
+function formatAudioTime(seconds) {
+    const min = Math.floor(seconds / 60);
+    const sec = Math.floor(seconds % 60);
+    return `${min}:${sec.toString().padStart(2, '0')}`;
+}
+
+function updateTrackUI(id, isPlaying) {
+    const item = document.getElementById(`item-${id}`);
+    if (!item) return;
+    
+    const btn = item.querySelector('.track-play-btn');
+    if (btn) btn.innerText = isPlaying ? '⏸' : '▶';
+    
+    if (isPlaying) item.classList.add('playing');
+    else item.classList.remove('playing');
+}
+
+// = = = = = = = = = = = = = = = = = = = = = =
+// SECTION: TRACKING ENGINE
+// = = = = = = = = = = = = = = = = = = = = = =
+
+// Main tracking function for local and external sync
+function track(event, data) {
+    // Normalize event name for strict backend
+    let strictEvent = event;
+    if (event === "brand_view") strictEvent = "view";
+    if (event === "audio_play") strictEvent = "play";
+    if (event === "cta_click") strictEvent = "click";
+
+    const brandSlug = data.brand || currentBrandSlug;
+    const timestamp = Date.now();
+    
+    // Strict Structure for Backend
+    const payload = {
+        brand: brandSlug,
+        event: strictEvent,
+        timestamp: timestamp
+    };
+
+    const eventLog = { event, data, time: timestamp };
+    
+    console.log("[Analytics]", event, data);
+    
+    // 1. Local Storage Tracking (Optimistic)
+    try {
+        let history = JSON.parse(localStorage.getItem("sonic_analytics") || "[]");
+        history.push(eventLog);
+        if (history.length > 100) history.shift();
+        localStorage.setItem("sonic_analytics", JSON.stringify(history));
+        
+        // Instant Optimistic Update
+        if (window.location.search === "" || !window.location.search.includes('brand')) {
+            renderHub(); 
+        }
+    } catch (e) {
+        console.error("Local Analytics failed", e);
+    }
+
+    // 2. External Sync (Cloudflare Worker + KV)
+    fetch("https://warstreet-analytics.warstreett.workers.dev/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    }).catch(() => {});
+}
+
+
+
+// ==============================
+// SECTION: EXPORT / RESET FUNCTIONS
+// ==============================
+
+// Reset active analytics session to history
+function resetAnalytics() {
+    try {
+        const currentLogs = localStorage.getItem("sonic_analytics");
+        if (currentLogs) {
+            let sessionHistory = JSON.parse(localStorage.getItem("sonic_analytics_history") || "[]");
+            sessionHistory.push({
+                archivedAt: Date.now(),
+                data: JSON.parse(currentLogs)
+            });
+            localStorage.setItem("sonic_analytics_history", JSON.stringify(sessionHistory));
+        }
+        localStorage.removeItem("sonic_analytics");
+        renderHub(); // Instant UI update
+    } catch (e) {
+        console.error("Reset failed", e);
+    }
+}
+
+
+// Download analytics data as JSON
+function exportAnalytics() {
+    const current = JSON.parse(localStorage.getItem("sonic_analytics") || "[]");
+    const history = JSON.parse(localStorage.getItem("sonic_analytics_history") || "[]");
+
+    const normalizeEvent = (e) => ({
+        event: e.event,
+        brand: e.brand || (e.data?.brand || "unknown"),
+        track: e.track || (e.data?.track || "n/a"),
+        type: e.type || (e.data?.type || "n/a"),
+        timeISO: new Date(e.time).toISOString(),
+        timeReadable: formatTime(e.time)
+    });
+
+    const processSession = (data) => ({
+        start: data.length > 0 ? new Date(data[0].time).toISOString() : "n/a",
+        end: data.length > 0 ? new Date(data[data.length - 1].time).toISOString() : "n/a",
+        events: data.map(normalizeEvent)
+    });
+
+    const allSessionsData = [...history.map(h => h.data), current];
+    const sessions = allSessionsData.filter(d => d.length > 0).map(processSession);
+
+    const summary = { totalViews: 0, totalPlays: 0, totalClicks: 0 };
+    sessions.forEach(s => {
+        s.events.forEach(e => {
+            if (e.event === "brand_view") summary.totalViews++;
+            if (e.event === "audio_play") summary.totalPlays++;
+            if (e.event === "cta_click") summary.totalClicks++;
+        });
+    });
+
+    const exportData = {
+        exportedAt: new Date().toISOString(),
+        summary: summary,
+        sessions: sessions
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "analytics.json";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+
+
+// ==============================
+// SECTION: NOTIFICATION CENTRE
+// ==============================
+
+let notifications = JSON.parse(localStorage.getItem("warstreet_notifications") || "[]");
+
+function createNotification({type, brand, message}) {
+    // Deduplication Rule: Update if same message for same brand exists
+    const existingIdx = notifications.findIndex(n => n.brand === brand && n.message === message);
+    
+    if (existingIdx !== -1) {
+        // Update timestamp instead of adding new
+        notifications[existingIdx].timestamp = Date.now();
+        notifications[existingIdx].read = false; 
+        console.log("Notification updated:", message);
+        saveNotifications();
+        return;
+    }
+
+    const noti = {
+        id: 'noti_' + Date.now() + Math.random().toString(36).substr(2, 5),
+        type,
+        brand,
+        message,
+        timestamp: Date.now(),
+        read: false
+    };
+
+    notifications.unshift(noti);
+    if (notifications.length > 50) notifications.pop();
+    console.log("Notification created:", message);
+    saveNotifications();
+}
+
+function saveNotifications() {
+    localStorage.setItem("warstreet_notifications", JSON.stringify(notifications));
+}
+
+function toggleNotifications(e) {
+    e.stopPropagation();
+    const panel = document.getElementById("noti-panel");
+    panel.classList.toggle("active");
+    if (panel.classList.contains("active")) {
+        renderNotificationList();
+    }
+}
+
+function renderNotificationList() {
+    const list = document.getElementById("noti-list");
+    if (!notifications.length) {
+        list.innerHTML = '<div style="padding:40px 20px; text-align:center; color:#444; font-size:12px;">No alerts detected.</div>';
+        return;
+    }
+    
+    list.innerHTML = notifications.map(n => `
+        <div class="noti-item ${n.read ? 'read' : 'unread'}" onclick="markAsRead('${n.id}', event)">
+            <div class="brand">${BRANDS[n.brand]?.name || n.brand}</div>
+            <div class="msg">${n.message}</div>
+            <div class="time">${formatTime(n.timestamp)}</div>
+        </div>
+    `).join("");
+}
+
+function markAsRead(id, e) {
+    e.stopPropagation();
+    const noti = notifications.find(n => n.id === id);
+    if (noti) {
+        noti.read = true;
+        saveNotifications();
+        renderNotificationList();
+        
+        // Instant Badge Update
+        const unreadCount = notifications.filter(n => !n.read).length;
+        const btn = document.querySelector(".icon-btn");
+        const badge = btn.querySelector(".noti-badge");
+        if (unreadCount === 0) {
+            btn.classList.remove("has-new");
+            if (badge) badge.remove();
+        } else if (badge) {
+            badge.innerText = unreadCount;
+        }
+    }
+}
+
+// Close panel on outside click
+document.addEventListener('click', () => {
+    const notiPanel = document.getElementById("noti-panel");
+    if (notiPanel) notiPanel.classList.remove("active");
+    
+    const gatePanel = document.getElementById("gate-share-panel");
+    if (gatePanel) gatePanel.classList.remove("active");
+});
+
+
+// ==============================
+// SECTION: UTILITIES (helpers)
+// ==============================
+
+// Utility: Format Time Short
+function formatTimeShort(ts) {
+    const d = new Date(ts);
+    return d.getHours().toString().padStart(2, '0') + ":" + d.getMinutes().toString().padStart(2, '0');
+}
+
+
+// Convert timestamp to readable date
+function formatTime(ts) {
+    return new Date(ts).toLocaleString();
+}
+
+
+// Toggle modal visibility
+function toggleHistory() {
+    const modal = document.getElementById("historyModal");
+    if (modal.classList.contains("show")) {
+        modal.classList.remove("show");
+        setTimeout(() => modal.style.display = "none", 300);
+    } else {
+        modal.style.display = "flex";
+        setTimeout(() => modal.classList.add("show"), 10);
+    }
+}
+
+
+// Update brand visual theme variables
+function applyTheme(theme) {
+    document.documentElement.style.setProperty('--brand-primary', theme.primary);
+    document.documentElement.style.setProperty('--brand-accent', theme.accent);
+    
+    // Derived RGB for background overlays
+    const rgb = hexToRgb(theme.primary);
+    if (rgb) {
+        document.documentElement.style.setProperty('--brand-primary-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+    }
+}
+
+
+// Helper to convert hex to RGB object
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+
+// Animate number count-up
+function animateNumber(id, finalValue) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    
+    const startValue = 0;
+    const duration = 1000;
+    let startTime = null;
+
+    function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const current = Math.floor(progress * (finalValue - startValue) + startValue);
+        el.innerText = current;
+        
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            el.classList.add("pulse-value");
+            setTimeout(() => el.classList.remove("pulse-value"), 500);
+        }
+    }
+    window.requestAnimationFrame(step);
+}
+
+</script>
+</body>
+</html>
